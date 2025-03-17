@@ -7,10 +7,11 @@ git checkout HippoKingKoL/condo_is_lit
 ```
 
 ## Description:
-This is a simple command line interface for the Leprecondo in KoLMafia. It takes a comma separated list of furniture and installs it if there's exactly 4.
-If given no arguments, it prints your current condo furniture installed.
-If given "discovered" as an argument, it prints your current available furniture.
-If given "todo" as an argument, it prints the furniture you haven't found yet, and where to go.
+This is a simple command line interface for the Leprecondo in KoLMafia.
+- If given no arguments, it prints your current condo furniture installed.
+- It given a comma separated list of furniture, it installs it if there's exactly 4.
+- If given "discovered" as an argument, it prints your current available furniture.
+- If given "todo" as an argument, it prints the furniture you haven't found yet, and where to go.
 
 ## Example:
 ```
