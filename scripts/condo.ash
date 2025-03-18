@@ -119,6 +119,23 @@ string need_to_string(int need)
 
 void rprint(string s) {print(s,"red");}
 
+string to_link(string s)
+{
+    // Are we an effect
+    effect ef = to_effect(s);
+    if (ef != $effect[none])
+    {
+        return `<a href=\"/desc_effect.php?whicheffect={ef.descid}\">{s}</a>`;
+    }
+    // Are we an effect
+    item it = to_item(s);
+    if (it != $item[none])
+    {
+        return `<a href=\"/desc_item.php?whichitem={it.descid}\">{s}</a>`;
+    }
+    return s;
+}
+
 string strip(string input)
 {
 	matcher whitespace = create_matcher("(\\A\\s+)|(\\s+\\z)", input);
@@ -240,7 +257,7 @@ boolean print_results(int f0, int f1, int f2, int f3)
     
     buffer out_html = to_buffer("<table border=\"1\">");
     for (int need = 1 ; need <= 6 ; need++) {
-        out_html.append("<tr><td>"+need_to_string(need)+"</td><td>"+results[need]+"</td><td>"+sources[need]+"</td></tr>");
+        out_html.append("<tr><td>"+need_to_string(need)+"</td><td>"+to_link(results[need])+"</td><td>"+sources[need]+"</td></tr>");
     }
     out_html.append("</table>");
     print_html(out_html);
