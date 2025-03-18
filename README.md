@@ -15,31 +15,17 @@ This is a simple command line interface for the Leprecondo in KoLMafia.
 
 ## Example:
 ```
-> condo
+> condo help
 
-Current condo setup:
-couch and flatscreen
-cupcake treadmill
-programmable blender
-
-> condo couch a,treadmill,blender,omni
-
-Setting condo to:
-couch and flatscreen
-cupcake treadmill
-programmable blender
-Omnipot
-Preference leprecondoInstalled changed from 18,9,14,0 to 18,9,14,25
-Preference _leprecondoRearrangements changed from 1 to 2
-
-> condo
-
-Current condo setup:
-couch and flatscreen
-cupcake treadmill
-programmable blender
-Omnipot
+condo run options:
+    condo - print current configuration
+    condo [sim] furn1,furn2,furn3,furn4 - set and print new configuration. With sim, print only.
+    condo discovered - print discovered furniture.
+    condo todo - print furniture left to find and locations.
+    condo help - print this message.
 ```
 
+![Status](/condo_status.PNG)
+![Sim](/condo_sim.PNG)
 ![ToDo](/todo.PNG)
 

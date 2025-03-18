@@ -312,10 +312,11 @@ void main(string... raw_input)
     
     if (count(raw_input) == 0)
     {
-        print("Current condo setup:");
+        buffer out_html = to_buffer("Current condo setup: <br />");
         foreach i,id_string in split_string(get_property("leprecondoInstalled"),",") {
-            print_html("&nbsp;&nbsp;"+FURNITURE[id_string.to_int()]);
+            out_html.append("<span>&nbsp;&nbsp;&nbsp;&nbsp;"+FURNITURE[id_string.to_int()]+"</span><br />");
         }
+        print_html(out_html);
         print_results();
         return;
     }
