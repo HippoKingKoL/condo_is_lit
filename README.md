@@ -13,6 +13,8 @@ This is a simple command line interface for the Leprecondo in KoLMafia.
 - If given "discovered" as an argument, it prints your current available furniture.
 - If given "todo" as an argument, it prints the furniture you haven't found yet, and where to go.
 
+If known, furniture is displayed in task order, with an indicator of your leprechaun's current location.
+
 ## Example:
 ```
 > condo help

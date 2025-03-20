@@ -31,7 +31,8 @@ static string[int] FURNITURE = {
     25: "Omnipot",
     26: "fully-stocked wet bar",
     27: "four-posted bed",
-    BAD_FURNITURE: "BAD FURNITURE"
+    BAD_FURNITURE: "BAD FURNITURE",
+    0: "UNSET"
 };
 
 static location[int] FURNITURE_LOCATION = {
@@ -65,12 +66,14 @@ static location[int] FURNITURE_LOCATION = {
     BAD_FURNITURE: $location[none]
 };
 
+static int BAD_NEED    =-1;
 static int NEED_EXER   = 1;
 static int NEED_SMART  = 2;
 static int NEED_DUMB   = 3;
 static int NEED_FOOD   = 4;
 static int NEED_BOOZE  = 5;
 static int NEED_SLEEP  = 6;
+
 
 static string[int][int] FURNITURE_RESULT = {
      0: {}, // unset value
@@ -104,6 +107,14 @@ static string[int][int] FURNITURE_RESULT = {
     BAD_FURNITURE: {}
 };
 
+string strip(string input)
+{
+	matcher whitespace = create_matcher("(\\A\\s+)|(\\s+\\z)", input);
+	return replace_all(whitespace, "");
+}
+
+void rprint(string s) {print(s,"red");}
+
 string need_to_string(int need)
 {
     switch (need) {
@@ -117,7 +128,16 @@ string need_to_string(int need)
     return "BAD NEED";
 }
 
-void rprint(string s) {print(s,"red");}
+int string_to_need(string need)
+{
+    string tlc(string s) {return strip(to_lower_case(s));}
+    for (int i = 1 ; i <= 6 ; i++) {
+        if (tlc(need_to_string(i))==tlc(need)) {
+            return i;
+        }
+    }
+    return bad_need;
+}
 
 string to_link(string s)
 {
@@ -134,12 +154,6 @@ string to_link(string s)
         return `<a href=\"/desc_item.php?whichitem={it.descid}\">{s}</a>`;
     }
     return s;
-}
-
-string strip(string input)
-{
-	matcher whitespace = create_matcher("(\\A\\s+)|(\\s+\\z)", input);
-	return replace_all(whitespace, "");
 }
 
 int substring_match_furniture(string match)
@@ -205,11 +219,11 @@ boolean set_condo(int f0, int f1, int f2, int f3, boolean sim)
     if (!print_and_check_config(all_furn)) { return false; }
     if (sim) { return true; }
     if (get_property("leprecondoInstalled")==`{f0},{f1},{f2},{f3}`) {
-        print("Condo is already set to that. Not wasting time doing it again.");
+        rprint("Condo is already set to that. Not wasting time doing it again.");
     }
     else {
         visit_url("inv_use.php?whichitem="+to_int($item[Leprecondo]));
-        string url = `choice.php?whichchoice=1556&option=1&r0={f0}&r1={f1}&r2={f2}&r3={f3}&pwd`;
+        string url = `choice.php?whichchoice={CONDO_CHOICE_ID}&option=1&r0={f0}&r1={f1}&r2={f2}&r3={f3}&pwd`;
         visit_url(url);
     }
     return get_property("leprecondoInstalled")==`{f0},{f1},{f2},{f3}`;
@@ -242,6 +256,20 @@ boolean set_condo(string f0_name, string f1_name, string f2_name, string f3_name
     return set_condo(f0_name, f1_name, f2_name, f3_name, false);
 }
 
+string[int] condo_need_order()
+{
+    string needs = get_property("leprecondoNeedOrder");
+    string[int] split_pref = split_string(needs,",");
+    if (count(split_pref) == 6) { return split_pref; }
+    string[int] empty;
+    return empty;
+}
+
+boolean know_need_order()
+{
+    return count(condo_need_order())==6;
+}
+
 boolean print_results(int f0, int f1, int f2, int f3)
 {
     string[int] results;
@@ -256,8 +284,21 @@ boolean print_results(int f0, int f1, int f2, int f3)
     foreach need,res in FURNITURE_RESULT[f3] { results[need] = res; sources[need] = FURNITURE[f3];}
     
     buffer out_html = to_buffer("<table border=\"1\">");
-    for (int need = 1 ; need <= 6 ; need++) {
-        out_html.append("<tr><td>"+need_to_string(need)+"</td><td>"+to_link(results[need])+"</td><td>"+sources[need]+"</td></tr>");
+    string[int] need_order = condo_need_order();
+    if (count(need_order)==6) {
+        foreach i,need_str in need_order {
+            int need_n = string_to_need(need_str);
+            out_html.append("<tr><td>"+need_to_string(need_n)+"</td><td>"+to_link(results[need_n])+"</td><td>"+sources[need_n]+"</td>");
+            if (strip(to_lower_case(need_str))==strip(to_lower_case(get_property("leprecondoCurrentNeed")))) {
+                out_html.append("<td border=\"0\""+"> &lt;-- you are here"+"</td>");
+            }
+            out_html.append("</tr>");
+        }
+    }
+    else {
+        for (int need_n = 1 ; need_n <= 6 ; need_n++) {
+            out_html.append("<tr><td>"+need_to_string(need_n)+"</td><td>"+to_link(results[need_n])+"</td><td>"+sources[need_n]+"</td></tr>");
+        }
     }
     out_html.append("</table>");
     print_html(out_html);
@@ -334,6 +375,7 @@ void main(string... raw_input)
             out_html.append("<span>&nbsp;&nbsp;&nbsp;&nbsp;"+FURNITURE[id_string.to_int()]+"</span><br />");
         }
         print_html(out_html);
+        print("Current results"+(know_need_order()?":":" (order unknown):"));
         print_results();
         return;
     }
@@ -363,7 +405,7 @@ void main(string... raw_input)
     {
         input[0] = substring(input[0],4);
         set_condo(input[0],input[1],input[2],input[3],true);
-        print("Simulated results:");
+        print("Simulated results"+(know_need_order()?":":" (order unknown):"));
         print_results(input[0],input[1],input[2],input[3]);
         return;
     }
@@ -373,7 +415,7 @@ void main(string... raw_input)
         rprint("Failed to set condo");
     }
     
-    print("Current results:");
+    print("Current results"+(know_need_order()?":":" (order unknown):"));
     print_results();
     
     return;
